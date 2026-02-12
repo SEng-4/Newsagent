@@ -118,6 +118,57 @@ function showProductModal(product = null) {
   });
 }
 
+function editProduct() {
+    const id = prompt("Enter product ID to edit:");
+    
+    if (!id) return;
+    
+    fetch(`/products/${id}`)
+        .then((getResponse) => {
+            if (!getResponse.ok) {
+                alert("Product not found!");
+                return;
+            }
+            return getResponse.json();
+        })
+        .then((existingProduct) => {
+            if (!existingProduct) return;
+            
+            const name = prompt("Edit product name:", existingProduct.name) || existingProduct.name;
+            const price = prompt("Edit product price:", existingProduct.price) || existingProduct.price;
+            const quantity = prompt("Edit quantity:", existingProduct.quantity) || existingProduct.quantity;
+            const type = prompt("Edit type:", existingProduct.type) || existingProduct.type;
+            
+            const updatedProduct = {
+                id: id,
+                name: name,
+                price: parseFloat(price),
+                quantity: parseInt(quantity),
+                type: type
+            };
+            
+            return fetch(`/products/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedProduct)
+            });
+        })
+        .then((putResponse) => {
+            if (putResponse && putResponse.ok) {
+                console.log("Product edited successfully!");
+                populateTable();
+            } else if (putResponse) {
+                alert("Error editing product.");
+            }
+        })
+        .catch((error) => {
+            alert("Error editing product.");
+            console.error("Error:", error);
+        });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   populateTable();
 });
