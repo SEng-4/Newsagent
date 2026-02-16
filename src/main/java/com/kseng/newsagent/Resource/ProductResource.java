@@ -47,7 +47,48 @@ public class ProductResource {
     // POST /products - create new product
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody Product product) {
+        // Verify that a product name is provided and valid
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Product name is required and cannot be empty"));
+        }
+        
+        // Verify that a product price is provided as a valid, non-negative double
+        if (product.getPrice() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Product price is required"));
+        }
+        if (product.getPrice() < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Product price cannot be negative"));
+        }
+        
+        // Verify that an initial inventory value is provided and cannot be less than zero
+        if (product.getQuantity() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Product quantity is required"));
+        }
+        if (product.getQuantity() < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Product quantity cannot be negative"));
+        }
+        
+        // Verify no duplicates of the product (by name) are being created
+        Product existingProduct = productRepository.findByName(product.getName());
+        if (existingProduct != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "A product with name '" + product.getName() + "' already exists"));
+        }
+        
+        // Save and verify that it was actually added
         Product newProduct = productRepository.save(product);
+        
+        // Verify that it was actually saved (ID should be generated)
+        if (newProduct.getId() == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to create product"));
+        }
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
     }
 

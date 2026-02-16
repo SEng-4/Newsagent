@@ -63,6 +63,8 @@ public class ProductResourceTests {
     public void testCreateProduct() throws Exception {
         // Arrange
         Product product = new Product("Book D", "BOOK", 15.0, 30);
+        product.setId(1L); // Simulate ID generation after save
+        when(productRepository.findByName("Book D")).thenReturn(null);
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // Act & Assert
@@ -71,6 +73,137 @@ public class ProductResourceTests {
                 .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Book D"));
+    }
+
+    @Test
+    public void testCreateProduct_NullName_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product(null, "BOOK", 15.0, 30);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product name is required and cannot be empty"));
+    }
+
+    @Test
+    public void testCreateProduct_EmptyName_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product("   ", "BOOK", 15.0, 30);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product name is required and cannot be empty"));
+    }
+
+    @Test
+    public void testCreateProduct_NullPrice_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product("Book E", "BOOK", null, 30);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product price is required"));
+    }
+
+    @Test
+    public void testCreateProduct_NegativePrice_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product("Book F", "BOOK", -5.0, 30);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product price cannot be negative"));
+    }
+
+    @Test
+    public void testCreateProduct_NullQuantity_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product("Book G", "BOOK", 15.0, null);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product quantity is required"));
+    }
+
+    @Test
+    public void testCreateProduct_NegativeQuantity_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        Product product = new Product("Book H", "BOOK", 15.0, -10);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Product quantity cannot be negative"));
+    }
+
+    @Test
+    public void testCreateProduct_DuplicateName_ShouldReturnConflict() throws Exception {
+        // Arrange
+        Product existingProduct = new Product("Duplicate Book", "BOOK", 20.0, 10);
+        existingProduct.setId(1L);
+        Product newProduct = new Product("Duplicate Book", "BOOK", 15.0, 30);
+        
+        when(productRepository.findByName("Duplicate Book")).thenReturn(existingProduct);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(newProduct)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("A product with name 'Duplicate Book' already exists"));
+    }
+
+    @Test
+    public void testCreateProduct_SaveFailed_ShouldReturnInternalServerError() throws Exception {
+        // Arrange
+        Product product = new Product("Book I", "BOOK", 15.0, 30);
+        Product savedProductWithoutId = new Product("Book I", "BOOK", 15.0, 30);
+        // savedProductWithoutId has no ID (simulating a failed save)
+        
+        when(productRepository.findByName("Book I")).thenReturn(null);
+        when(productRepository.save(any(Product.class))).thenReturn(savedProductWithoutId);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("Failed to create product"));
+    }
+
+    @Test
+    public void testCreateProduct_ValidProduct_WithZeroQuantity_ShouldSucceed() throws Exception {
+        // Arrange - Edge case: zero quantity should be allowed
+        Product product = new Product("Zero Stock Book", "BOOK", 10.0, 0);
+        product.setId(10L);
+        
+        when(productRepository.findByName("Zero Stock Book")).thenReturn(null);
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act & Assert
+        mockMvc.perform(post("/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Zero Stock Book"))
+                .andExpect(jsonPath("$.quantity").value(0));
     }
 
     @Test
