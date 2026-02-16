@@ -1,0 +1,81 @@
+body {
+  margin: 20px;
+  background-color: white;
+}
+
+.ui-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 240px;
+  height: 80px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.ui-btn:hover {
+  background-color: #218838;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.ui-btn span {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-content button {
+  margin-right: 10px;
+}

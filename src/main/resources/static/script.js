@@ -46,34 +46,84 @@ function populateTable() {
     });
 }
 
-function addProduct() {
-    const name = prompt("Enter product name:");
-    const price = prompt("Enter product price:");
-    const quantity = prompt("Enter quantity:");
-    const type = prompt("Enter type:");
+function showProductModal(product = null) {
+  const modal = document.createElement("div");
+  modal.className = "modal";
 
-    const product = {
-        name: name,
-        price: price,
-        quantity: quantity,
-        type: type
-    }
+  const isEdit = product !== null;
+  const title = isEdit ? "Edit Product" : "Add Product";
+  const submitText = isEdit ? "Update" : "Create";
 
-    fetch("/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product)
-    }).then((response) => {
-        if (response.ok) {
-            console.log("Product added successfully!");
-            populateTable();
-        } else {
-            alert("Error adding product.");
-            console.error("Error:", error);
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>${title}</h2>
+      <form id="product-form">
+        <label for="product-name">Product Name:</label>
+        <input type="text" id="product-name" name="product-name" value="${isEdit ? product.name : ""}" required />
+
+        <label for="product-price">Price:</label>
+        <input type="number" id="product-price" name="product-price" step="0.01" value="${isEdit ? product.price : ""}" required />
+
+        <label for="product-quantity">Quantity:</label>
+        <input type="number" id="product-quantity" name="product-quantity" value="${isEdit ? product.quantity : ""}" required />
+
+        <label for="product-type">Type:</label>
+        <input type="text" id="product-type" name="product-type" value="${isEdit ? product.type : ""}" required />
+
+        <button type="submit">${submitText}</button>
+        <button type="button" id="cancel-btn">Cancel</button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  $("#cancel-btn").addEventListener("click", () => {
+    document.body.removeChild(modal);
+  });
+
+  $("#product-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const productData = {
+      name: $("#product-name").value,
+      price: $("#product-price").value,
+      quantity: $("#product-quantity").value,
+      type: $("#product-type").value,
+    };
+
+    const url = isEdit ? `/products/${product.id}` : "/products";
+    const method = isEdit ? "PUT" : "POST";
+
+    fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network error: " + response.statusText);
         }
-    });
+        return response.json();
+      })
+      .then(() => {
+        console.log(`Product ${isEdit ? "updated" : "added"} successfully!`);
+        document.body.removeChild(modal);
+        populateTable();
+      })
+      .catch((error) => {
+        alert(`Error ${isEdit ? "updating" : "adding"} product.`);
+        console.error("Error:", error);
+      });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   populateTable();
 });
+
+document
+  .getElementById("create-btn")
+  .addEventListener("click", () => {
+    showProductModal();
+  });
