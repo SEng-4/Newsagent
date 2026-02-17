@@ -6,15 +6,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * Initializes the application with sample product data on startup.
+ * 
+ * This component implements CommandLineRunner to execute initialization logic after
+ * the Spring application context has been fully loaded. It populates the database with
+ * a diverse set of sample products across different categories (newspapers, magazines,
+ * and other items) to facilitate testing and demonstration of the API.
+ * 
+ * This data is added each time the application starts. For production use, consider
+ * implementing conditional logic to avoid re-adding data on every startup.
+ */
 @Component
 public class DataInitialiser implements CommandLineRunner {
 
     @Autowired
     private ProductRepository productRepository;
 
+    /**
+     * Runs on application startup to populate the database with sample product data.
+     * Creates 10 sample products with varying names, categories, prices, and quantities.
+     * 
+     * @param args command-line arguments (not used in this implementation)
+     * @throws Exception if an error occurs during data initialization
+     */
     @Override
     public void run(String... args) throws Exception {
-        // Add dummy data to the database
+        // Populate database with sample products representing different product types
+        // Products include newspapers, magazines, and miscellaneous items with realistic pricing
         productRepository.save(new Product("Daily Times", "NEWSPAPER", 1.50, 100));
         productRepository.save(new Product("Tech Monthly", "MAGAZINE", 5.99, 50));
         productRepository.save(new Product("Gourmet Weekly", "MAGAZINE", 3.99, 30));
