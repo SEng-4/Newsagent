@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newsagent</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <h1>Newsagent</h1>
-    
+
     <table id="products" border="2">
         <thead>
             <tr>
@@ -22,7 +23,9 @@
         <tbody></tbody>
     </table>
 
-    <button onclick="addProduct()">Add Product</button>
-    <button onclick="editProduct()">Edit Product</button>
+    <button id="create-btn">Add Product</button>
+    <button id="edit-btn" onclick="enterEditMode()">Edit Products</button>
+    <button id="save-btn" onclick="saveEdits()">Save</button>
+    <button id="discard-btn" onclick="discardEdits()">Discard</button>
 </body>
 </html>

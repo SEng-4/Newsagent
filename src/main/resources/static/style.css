@@ -79,3 +79,15 @@ body {
 .modal-content button {
   margin-right: 10px;
 }
+
+.edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px 4px;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+#save-btn, #discard-btn {
+  display: none;
+}

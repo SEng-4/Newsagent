@@ -1,6 +1,8 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
+let snapshot = {};
+
 function populateTable() {
   const tableBody = document.querySelector("#products tbody");
 
@@ -17,26 +19,14 @@ function populateTable() {
     .then((data) => {
       data.forEach((product) => {
         const row = document.createElement("tr");
+        row.dataset.id = product.id;
 
-        const idCell = document.createElement("td");
-        idCell.textContent = product.id;
-        row.appendChild(idCell);
-
-        const nameCell = document.createElement("td");
-        nameCell.textContent = product.name;
-        row.appendChild(nameCell);
-
-        const priceCell = document.createElement("td");
-        priceCell.textContent = product.price;
-        row.appendChild(priceCell);
-
-        const quantityCell = document.createElement("td");
-        quantityCell.textContent = product.quantity;
-        row.appendChild(quantityCell);
-
-        const typeCell = document.createElement("td");
-        typeCell.textContent = product.type;
-        row.appendChild(typeCell);
+        ["id", "name", "price", "quantity", "type"].forEach((field) => {
+          const td = document.createElement("td");
+          td.dataset.field = field;
+          td.textContent = product[field];
+          row.appendChild(td);
+        });
 
         tableBody.appendChild(row);
       });
@@ -118,114 +108,69 @@ function showProductModal(product = null) {
   });
 }
 
-function editProduct() {
-    const id = prompt("Enter product ID to edit:");
-    
-    if (!id) return;
-    
-    fetch(`/products/${id}`)
-        .then((getResponse) => {
-            if (!getResponse.ok) {
-                alert("Product not found!");
-                return;
-            }
-            return getResponse.json();
-        })
-        .then((existingProduct) => {
-            if (!existingProduct) return;
-            
-            const name = prompt("Edit product name:", existingProduct.name) || existingProduct.name;
-            const price = prompt("Edit product price:", existingProduct.price) || existingProduct.price;
-            const quantity = prompt("Edit quantity:", existingProduct.quantity) || existingProduct.quantity;
-            const type = prompt("Edit type:", existingProduct.type) || existingProduct.type;
-            
-            const updatedProduct = {
-                id: id,
-                name: name,
-                price: parseFloat(price),
-                quantity: parseInt(quantity),
-                type: type
-            };
-            
-            return fetch(`/products/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(updatedProduct)
-            });
-        })
-        .then((putResponse) => {
-            if (putResponse && putResponse.ok) {
-                console.log("Product edited successfully!");
-                populateTable();
-            } else if (putResponse) {
-                alert("Error editing product.");
-            }
-        })
-        .catch((error) => {
-            alert("Error editing product.");
-            console.error("Error:", error);
-        });
+function enterEditMode() {
+  snapshot = {};
+  document.querySelectorAll("#products tbody tr").forEach((row) => {
+    const id = row.dataset.id;
+    snapshot[id] = {};
+    row.querySelectorAll("td[data-field]").forEach((td) => {
+      snapshot[id][td.dataset.field] = td.textContent;
+      if (td.dataset.field === "id") return;
+      td.innerHTML = `<input class="edit-input" value="${td.textContent}">`;
+    });
+  });
+  $("#edit-btn").style.display = "none";
+  $("#save-btn").style.display = "inline-block";
+  $("#discard-btn").style.display = "inline-block";
 }
 
-function editProduct() {
-    const id = prompt("Enter product ID to edit:");
-    
-    if (!id) return;
-    
-    fetch(`/products/${id}`)
-        .then((getResponse) => {
-            if (!getResponse.ok) {
-                alert("Product not found!");
-                return;
-            }
-            return getResponse.json();
-        })
-        .then((existingProduct) => {
-            if (!existingProduct) return;
-            
-            const name = prompt("Edit product name:", existingProduct.name) || existingProduct.name;
-            const price = prompt("Edit product price:", existingProduct.price) || existingProduct.price;
-            const quantity = prompt("Edit quantity:", existingProduct.quantity) || existingProduct.quantity;
-            const type = prompt("Edit type:", existingProduct.type) || existingProduct.type;
-            
-            const updatedProduct = {
-                id: id,
-                name: name,
-                price: parseFloat(price),
-                quantity: parseInt(quantity),
-                type: type
-            };
-            
-            return fetch(`/products/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(updatedProduct)
-            });
-        })
-        .then((putResponse) => {
-            if (putResponse && putResponse.ok) {
-                console.log("Product edited successfully!");
-                populateTable();
-            } else if (putResponse) {
-                alert("Error editing product.");
-            }
-        })
-        .catch((error) => {
-            alert("Error editing product.");
-            console.error("Error:", error);
-        });
+function saveEdits() {
+  document.querySelectorAll("#products tbody tr").forEach((row) => {
+    const id = row.dataset.id;
+    const name = row.querySelector("[data-field='name'] input").value;
+    const price = row.querySelector("[data-field='price'] input").value;
+    const quantity = row.querySelector("[data-field='quantity'] input").value;
+    const type = row.querySelector("[data-field='type'] input").value;
+
+    const product = { id, name, price, quantity, type };
+
+    fetch(`/products/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product)
+    }).then((response) => {
+      if (response.ok) {
+        console.log("Product saved successfully!");
+      } else {
+        alert("Error saving product.");
+      }
+    });
+  });
+
+  exitEditMode();
+  populateTable();
+}
+
+function discardEdits() {
+  document.querySelectorAll("#products tbody tr").forEach((row) => {
+    const id = row.dataset.id;
+    row.querySelectorAll("td[data-field]").forEach((td) => {
+      td.textContent = snapshot[id][td.dataset.field];
+    });
+  });
+  exitEditMode();
+}
+
+function exitEditMode() {
+  snapshot = {};
+  $("#edit-btn").style.display = "inline-block";
+  $("#save-btn").style.display = "none";
+  $("#discard-btn").style.display = "none";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   populateTable();
-});
-
-document
-  .getElementById("create-btn")
-  .addEventListener("click", () => {
+  document.getElementById("create-btn").addEventListener("click", () => {
     showProductModal();
   });
+});
