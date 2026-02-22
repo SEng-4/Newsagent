@@ -124,7 +124,9 @@ function enterEditMode() {
   $("#discard-btn").style.display = "inline-block";
 }
 
-function saveEdits() {
+async function saveEdits() {
+  const changes = [];
+
   document.querySelectorAll("#products tbody tr").forEach((row) => {
     const id = row.dataset.id;
     const name = row.querySelector("[data-field='name'] input").value;
@@ -134,21 +136,28 @@ function saveEdits() {
 
     const product = { id, name, price, quantity, type };
 
-    fetch(`/products/${id}`, {
+    const promise = fetch(`/products/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(product)
     }).then((response) => {
-      if (response.ok) {
-        console.log("Product saved successfully!");
-      } else {
+      if (!response.ok) {
         alert("Error saving product.");
       }
+      return response;
     });
+
+    changes.push(promise);
   });
 
-  exitEditMode();
-  populateTable();
+  try {
+    await Promise.all(changes);
+    console.log("Product saved successfully!");
+    exitEditMode();
+    populateTable();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function discardEdits() {
