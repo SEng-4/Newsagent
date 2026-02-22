@@ -10,7 +10,7 @@
 <body>
     <h1>Newsagent</h1>
 
-    <table id="products" border="2">
+    <table id="products">
         <thead>
             <tr>
                 <th>ID</th>
@@ -22,17 +22,13 @@
         </thead>
         <tbody></tbody>
     </table>
+<div class = "btn-group">
 
-    <button id="create-btn" class="ui-btn">
-    <span>+</span>
-    Add Product
-    </button>
-
-    <button id="create-btn">Add Product</button>
-    <button id="edit-btn" onclick="enterEditMode()">Edit Products</button>
-    <button id="save-btn" onclick="saveEdits()">Save</button>
-    <button id="discard-btn" onclick="discardEdits()">Discard</button>
-
+    <button id="create-btn" class="ui-btn">Add Product</button>
+    <button id="edit-btn" onclick="enterEditMode()" class="ui-btn">Edit Products</button>
+    <button id="save-btn" onclick="saveEdits()" class="ui-btn">Save</button>
+    <button id="discard-btn" onclick="discardEdits ()" class="ui-btn">Discard</button>
+</div>
     <script src="script.js"></script>
 </body>
 </html>
