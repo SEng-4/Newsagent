@@ -1,6 +1,6 @@
 package com.kseng.newsagent.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,10 +18,11 @@ import com.kseng.newsagent.Entity.Sale;
 public interface SaleRepository extends JpaRepository<Sale, Long> {
     
     /**
-     * Finds all products matching a specific type/category.
-     * 
-     * @param type the product type to search for (e.g., "NEWSPAPER", "MAGAZINE", "OTHER")
-     * @return a list of products matching the specified type
+     * Finds all sales between two date/time values (inclusive).
+     *
+     * @param startTime start of the date/time range
+     * @param endTime end of the date/time range
+     * @return a list of sales in the supplied range
      */
-    List<Sale> findByDate(LocalDate date);
+    List<Sale> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
 }

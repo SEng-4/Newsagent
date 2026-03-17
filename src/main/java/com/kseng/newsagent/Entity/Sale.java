@@ -1,48 +1,32 @@
 package com.kseng.newsagent.Entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
 
-/**
- * Represents a product in the  system.
- * 
- * This JPA entity maps to the 'products' database table and represents various types of
- * items available for sale, including newspapers, magazines, books, and other retail goods.
- * Each product maintains core information needed for inventory management and sales operations.
- * 
- * The entity uses auto-generated primary keys via the IDENTITY strategy, allowing the
- * database to manage unique ID assignment for each product.
- */
+/** Represents a completed sale transaction with one or more line items. */
 @Entity
 @Table(name="sales")
 public class Sale {
 
-    /** Unique identifier for the product, generated automatically by the database */
+    /** Unique identifier for the sale, generated automatically by the database */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private List<Product> sales;
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleItem> items = new ArrayList<>();
 
-    /** Product category/type (e.g., "NEWSPAPER", "MAGAZINE", "OTHER") */
+    /** Date/time when the sale was completed. */
     @Column
     private LocalDateTime time;
 
     /** Default no-argument constructor required by JPA */
     public Sale() {}
 
-    /**
-     * Constructs a new Product with specified details.
-     * 
-     * @param name the product name/title
-     * @param type the product category or type
-     * @param price the retail price
-     * @param quantity the initial quantity in stock
-     */
-    public Sale(List<Product> sales, LocalDateTime time) {
-        this.sales = sales;
+    public Sale(List<SaleItem> items, LocalDateTime time) {
+        setItems(items);
         this.time = time;
     }
 
@@ -54,12 +38,29 @@ public class Sale {
         this.id = id;
     }
 
-    public List<Product> getSales() {
-        return sales;
+    public List<SaleItem> getItems() {
+        return items;
     }
 
-    public void setSales(List<Product> sales) {
-        this.sales = sales;
+    public void setItems(List<SaleItem> items) {
+        this.items.clear();
+
+        if (items == null) {
+            return;
+        }
+
+        for (SaleItem item : items) {
+            addItem(item);
+        }
+    }
+
+    public void addItem(SaleItem item) {
+        if (item == null) {
+            return;
+        }
+
+        item.setSale(this);
+        this.items.add(item);
     }
 
     public LocalDateTime getTime() {
