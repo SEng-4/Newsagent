@@ -22,8 +22,10 @@ import com.kseng.newsagent.Entity.Sale;
 import com.kseng.newsagent.Entity.SaleItem;
 import com.kseng.newsagent.Repository.ProductRepository;
 import com.kseng.newsagent.Repository.SaleRepository;
+import com.kseng.newsagent.Service.ReceiptService;
 
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/sales")
@@ -35,6 +37,9 @@ public class SaleResource {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ReceiptService receiptService;
+
     @GetMapping
     public ResponseEntity<List<Sale>> getAllSales() {
         return ResponseEntity.ok(saleRepository.findAll());
@@ -44,6 +49,26 @@ public class SaleResource {
     public ResponseEntity<?> getSaleById(@PathVariable Long id) {
         return saleRepository.findById(id)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Sale not found with ID: " + id)));
+    }
+
+    @GetMapping("/{id}/receipt")
+    public ResponseEntity<?> getReceiptPdf(@PathVariable Long id) {
+        return saleRepository.findById(id)
+                .map(sale -> {
+                    try {
+                        byte[] pdfBytes = receiptService.generateReceiptPdf(sale);
+                        return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
+                                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_" + id + ".pdf\"")
+                                .body(pdfBytes);
+                    } catch (Exception e) { // yes, this is a general exception, and it should be more specific
+                                            // BUT you fail to understand that writing my own exception is boring
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Map.of("error", "Failed to generate receipt: " + e.getMessage()));
+                    }
+                })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "Sale not found with ID: " + id)));
     }
