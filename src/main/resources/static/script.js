@@ -143,6 +143,63 @@ function renderCart() {
 
 // ─── CHECKOUT ─────────────────────────────────────────────────────────────────
 
+async function checkout() {
+  const items = Object.values(cart).map(({ product, quantity }) => ({
+    productId: product.id,
+    quantity,
+  }));
+ 
+  if (items.length === 0) return;
+ 
+  const checkoutBtn = $("#checkout-btn");
+  checkoutBtn.disabled = true;
+  checkoutBtn.textContent = "Processing…";
+ 
+  try {
+    const response = await fetch("/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+ 
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Checkout failed");
+    }
+ 
+    const sale = await response.json();
+    cart = {};
+    renderCart();
+    populateTable();
+    showReceiptPrompt(sale.id);
+    showToast("Sale completed", "success");
+  } catch (err) {
+    showToast(`Error: ${err.message}`, "error");
+    checkoutBtn.disabled = false;
+  } finally {
+    checkoutBtn.textContent = "Checkout";
+  }
+}
+ 
+function showReceiptPrompt(saleId) {
+  const existing = $("#receipt-toast");
+  if (existing) existing.remove();
+ 
+  const div = document.createElement("div");
+  div.id = "receipt-toast";
+  div.className = "receipt-toast";
+  div.innerHTML = `
+    <span>Sale #${saleId} recorded.</span>
+    <a href="/sales/${saleId}/receipt" download="receipt_${saleId}.pdf" class="receipt-link">
+      ⬇ Download Receipt
+    </a>
+    <button class="receipt-close" onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.body.appendChild(div);
+ 
+  // auto-remove after 15s
+  setTimeout(() => div.remove(), 15000);
+}
 
 // ─── PRODUCT MODAL ───────────────────────────────────────────────
 
