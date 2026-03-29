@@ -19,7 +19,7 @@ public class ReceiptService {
 
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 15;
-    private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(Locale.UK);
+    private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     
     public byte[] generateReceiptPdf(Sale sale) {
         try (PDDocument document = new PDDocument()) {
