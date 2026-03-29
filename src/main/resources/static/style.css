@@ -1,6 +1,7 @@
 body {
-  margin: 20px auto;
+  margin: 0 auto;
   max-width: 1200px;
+  padding: 0 20px 20px;
   font-family: sans-serif;
   background-color: rgb(240, 231, 231);
 }
@@ -82,8 +83,13 @@ body {
 .modal-content button {
   margin-right: 10px;
 }
-
+#main-layout{
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
 #products {
+  flex: 1 1 auto;
   width: 100%;
   border: 2px solid rgb(0, 179, 255);
   border-collapse: separate;
@@ -104,12 +110,12 @@ body {
 }
 
 h1 {
-  font-family: sans-serif;
-  font-size: 2rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 4rem;
   font-weight: 700;
   color: black;
-  border-top: 0.3rem solid rgb(122, 10, 144);
-  border-bottom: 0.3rem solid rgb(122, 10, 144);
+  text-align: center;
+  text-decoration:underline darkgray 3px; 
 }
 
 #products tbody tr:hover {
@@ -135,11 +141,14 @@ h1 {
 
 /* Cart styles */
 #cart-section {
-  margin-top: 30px;
+  flex: 0 0 375px;
+  width: 375px;
   padding: 15px;
   border: 1px solid #ccc;
   background-color: #f9f9f9;
   border-radius: 8px;
+  position:sticky;
+  top:20px;
 }
 
 #cart-items {

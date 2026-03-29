@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newsagent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
     <h1>Newsagent</h1>
 
+    <div id="main-layout">
     <table id="products">
         <thead>
             <tr>
@@ -24,6 +28,8 @@
         <tbody></tbody>
     </table>
 
+    </table>
+
     <div id="cart-section">
         <h2>Your Cart</h2>
         <div id="cart-items"></div>
@@ -31,6 +37,7 @@
         <button id="checkout-btn" disabled>Checkout</button>
         <div id="receipt-area"></div>
     </div>
+    </div> <!-- end main-layout -->
 
     <div class="btn-group">
         <button id="create-btn" class="ui-btn">Add Product</button>
