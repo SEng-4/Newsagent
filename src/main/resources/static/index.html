@@ -18,17 +18,27 @@
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Type</th>
+                <th>Cart</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
-<div class = "btn-group">
 
-    <button id="create-btn" class="ui-btn">Add Product</button>
-    <button id="edit-btn" onclick="enterEditMode()" class="ui-btn">Edit Products</button>
-    <button id="save-btn" onclick="saveEdits()" class="ui-btn">Save</button>
-    <button id="discard-btn" onclick="discardEdits ()" class="ui-btn">Discard</button>
-</div>
+    <div id="cart-section">
+        <h2>Your Cart</h2>
+        <div id="cart-items"></div>
+        <div id="cart-total">Total: €0.00</div>
+        <button id="checkout-btn" disabled>Checkout</button>
+        <div id="receipt-area"></div>
+    </div>
+
+    <div class="btn-group">
+        <button id="create-btn" class="ui-btn">Add Product</button>
+        <button id="edit-btn" onclick="enterEditMode()" class="ui-btn">Edit Products</button>
+        <button id="save-btn" onclick="saveEdits()" class="ui-btn">Save</button>
+        <button id="discard-btn" onclick="discardEdits()" class="ui-btn">Discard</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
